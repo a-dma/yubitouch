@@ -7,7 +7,7 @@ operations in the OpenPGP application on a *YubiKey 4*
 
 This tool has been superseded in functionality by [[https://developers.yubico.com/yubikey-manager/][YubiKey Manager]]
 (currently only the CLI side). However, some people have shown
-interest in keepin this script around for ease of use and because if
+interest in keeping this script around for ease of use and because of
 its smaller surface / fewer dependencies.
 
 * Dependencies
