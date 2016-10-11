@@ -1,0 +1,47 @@
+* YubiTouch
+
+A Bash script for setting or clearing touch requests for cryptographic
+operations in the OpenPGP application on a *YubiKey 4*
+
+** Note
+
+This tool has been superseded in functionality by [[https://developers.yubico.com/yubikey-manager/][YubiKey Manager]]
+(currently only the CLI side). However, some people have shown
+interest in keepin this script around for ease of use and because if
+its smaller surface / fewer dependencies.
+
+* Dependencies
+
+ - gpg-connect-agent
+ - pinentry (any kind, optional)
+
+* Usage
+
+Run the tool as:
+#+BEGIN_SRC sh
+./install.sh {sig|aut|dec} {off|on|fix} [admin_pin]
+#+END_SRC
+
+where the parameters indicate the following:
+
+#+BEGIN_EXAMPLE
+ {sig|aut|dec} Signature, authentication or decryption key
+ {off|on|fix}  Value of the option
+ [admin_pin]   The Admin PIN of the YubiKey (optional)
+#+END_EXAMPLE
+
+Setting the touch option to ~fix~ will cause any subsequent invocation
+of this script on that same subkey to do nothing. The only way to
+reset this is by generating or importing a new key for that slot.
+
+If the Admin PIN is not provided through the command line, the tool
+will ask the user for it. If a version of ~pinentry~ is available it
+will be used, otherwise it will fall back to reading standard input.
+
+** Personalization advice
+
+To mitigate the fact that this tool needs to interact with the Admin
+PIN of a device, it is advisable to run the script after having
+generated/imported keys, but /before/ doing the full device
+personalization. Specifically, using this tool on a YubiKey that still
+has the default Amin PIN (~12345678~) set.
