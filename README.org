@@ -19,7 +19,7 @@ its smaller surface / fewer dependencies.
 
 Run the tool as:
 #+BEGIN_SRC sh
-./install.sh {sig|aut|dec} {off|on|fix} [admin_pin]
+./yubitouch.sh {sig|aut|dec} {off|on|fix} [admin_pin]
 #+END_SRC
 
 where the parameters indicate the following:
