@@ -73,7 +73,7 @@ fi
 
 PIN_LEN=${#PIN}
 
-PIN=$(echo -n "$PIN" | od -A n -t x1 --width=$PIN_LEN)
+PIN=$(echo -n "$PIN" | xxd -ps | tr -d '\n')
 
 PIN_LEN=$(printf %02x $PIN_LEN)
 
