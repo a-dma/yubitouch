@@ -6,6 +6,7 @@
 # Author: Alessio Di Mauro <alessio@yubico.com>
 
 GCA=$(which gpg-connect-agent)
+XXD=$(which xxd)
 DO=0
 UIF=0
 
@@ -15,6 +16,12 @@ PE_PROMPT="SETPROMPT Admin PIN\nGETPIN\nBYE"
 if [ -z "$GCA" ]
 then
     echo "Can not find gpg-connect-agent. Aborting...";
+    exit 1;
+fi
+
+if [ -z "$XXD" ]
+then
+    echo "Can not find xxd. Aborting...";
     exit 1;
 fi
 
