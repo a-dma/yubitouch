@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Bash script for setting or clearing touch requirements for
 # cryptographic operations the OpenPGP application on a YubiKey 4.
