@@ -7,8 +7,20 @@
 
 GCA=$(which gpg-connect-agent)
 XXD=$(which xxd)
+OD=$(which od)
 DO=0
 UIF=0
+
+ascii_to_hex()
+{
+    if [ -n "$XXD" ]
+    then
+        $XXD -ps
+    elif [ -n "$OD" ]
+    then
+        $OD -An -tx1
+    fi
+}
 
 PE=$(which pinentry)
 PE_PROMPT="SETPROMPT Admin PIN\nGETPIN\nBYE"
@@ -19,9 +31,9 @@ then
     exit 1;
 fi
 
-if [ -z "$XXD" ]
+if [ -z "$XXD" -a -z "$OD" ]
 then
-    echo "Can not find xxd. Aborting...";
+    echo "Can not find xxd(1) nor od(1). Aborting...";
     exit 1;
 fi
 
@@ -80,7 +92,7 @@ fi
 
 PIN_LEN=${#PIN}
 
-PIN=$(echo -n "$PIN" | xxd -ps | tr -d '\n')
+PIN=$(echo -n "$PIN" | ascii_to_hex | tr -d '\n')
 
 PIN_LEN=$(printf %02x $PIN_LEN)
 
