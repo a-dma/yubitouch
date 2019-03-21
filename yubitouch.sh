@@ -23,7 +23,7 @@ ascii_to_hex()
 }
 
 PE=$(which pinentry)
-PE_PROMPT="SETPROMPT Admin PIN\nGETPIN\nBYE"
+PE_PROMPT='SETPROMPT Admin PIN\nGETPIN\nBYE\n'
 
 if [ -z "$GCA" ]
 then
@@ -77,11 +77,13 @@ then
     PIN="$3"
 elif [ -z "$PE" ]
 then
-    echo -e "Pinentry not present\nFalling back to regular stdin.\nBe careful!"
+    echo "Pinentry not present"
+    echo "Falling back to regular stdin."
+    echo "Be careful!"
     echo "Enter your admin PIN: "
     read PIN
 else
-    PIN="$(echo -e $PE_PROMPT | $PE | sed -n '/^D .*/s/^D //p')"
+    PIN="$(printf "$PE_PROMPT" | $PE | sed -n '/^D .*/s/^D //p')"
 fi
 
 if [ -z "$PIN" ]
