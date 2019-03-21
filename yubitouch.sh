@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Bash script for setting or clearing touch requirements for
+# Shell script for setting or clearing touch requirements for
 # cryptographic operations the OpenPGP application on a YubiKey 4.
 #
 # Author: Alessio Di Mauro <alessio@yubico.com>
@@ -44,13 +44,13 @@ then
     exit 1;
 fi
 
-if [ "$1" == "sig" ]
+if [ "$1" = "sig" ]
 then
     DO="D6"
-elif [ "$1" == "dec" ]
+elif [ "$1" = "dec" ]
 then
     DO="D7"
-elif [ "$1" == "aut" ]
+elif [ "$1" = "aut" ]
 then
     DO="D8"
 else
@@ -58,13 +58,13 @@ else
     exit 1
 fi
 
-if [ "$2" == "off" ]
+if [ "$2" = "off" ]
 then
     UIF="00";
-elif [ "$2" == "on" ]
+elif [ "$2" = "on" ]
 then
     UIF="01"
-elif [ "$2" == "fix" ]
+elif [ "$2" = "fix" ]
 then
     UIF="02";
 else
