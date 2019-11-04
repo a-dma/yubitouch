@@ -30,6 +30,9 @@ where the parameters indicate the following:
  [admin_pin]   The Admin PIN of the YubiKey (optional)
 #+END_EXAMPLE
 
+If a PIN is provided through the command line, make sure to
+escape/quote it if it contains special characters like ~$~.
+
 Setting the touch option to ~fix~ will cause any subsequent invocation
 of this script on that same subkey to do nothing. The only way to
 reset this is by generating or importing a new key for that slot.
