@@ -94,7 +94,7 @@ fi
 
 PIN_LEN=${#PIN}
 
-PIN=$(echo -n "$PIN" | ascii_to_hex | tr -d '\n')
+PIN=$(printf "$PIN" | ascii_to_hex | tr -d '\n')
 
 PIN_LEN=$(printf %02x $PIN_LEN)
 
