@@ -22,7 +22,7 @@ ascii_to_hex()
     fi
 }
 
-PE=$(which pinentry)
+PE=$(command -v pinentry)
 PE_PROMPT='SETPROMPT Admin PIN\nGETPIN\nBYE\n'
 
 if [ -z "$GCA" ]
