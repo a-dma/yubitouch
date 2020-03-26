@@ -5,9 +5,9 @@
 #
 # Author: Alessio Di Mauro <alessio@yubico.com>
 
-GCA=$(which gpg-connect-agent)
-XXD=$(which xxd)
-OD=$(which od)
+GCA=$(command -v gpg-connect-agent)
+XXD=$(command -v xxd)
+OD=$(command -v od)
 DO=0
 UIF=0
 
