@@ -27,10 +27,22 @@ Run the tool as:
 where the parameters indicate the following:
 
 #+BEGIN_EXAMPLE
- {sig|aut|dec} Signature, authentication or decryption key
+ {sig|aut|dec|att} Signature, authentication, decryption or attestation key
  {off|on|fix|cacheon|cachefix} Touch setting to use
  [admin_pin] The Admin PIN of the YubiKey (optional)
 #+END_EXAMPLE
+
+** Key choice
+
+The four possible values for the key parameter are explained below.
+
+- sig :: Key used for digital signatures
+- aut :: Key used for authentication (e.g. SSH)
+- dec :: Key used for decryption
+- att :: Key used for attestation. YubiKey 5.2.2 and later
+
+The attestation functionality is a Yubico proprietary extension. More
+information available [[https://developers.yubico.com/PGP/Attestation.html][here]].
 
 ** Touch settings
 

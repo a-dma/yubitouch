@@ -40,7 +40,7 @@ fi
 if [ $# -lt 2 ] || [ $# -gt 3 ]
 then
     echo "Wrong parameters" >&2
-    echo "usage: yubitouch {sig|aut|dec} {off|on|fix|cacheon|cachefix} [admin_pin]"; >&2
+    echo "usage: yubitouch {sig|aut|dec|att} {off|on|fix|cacheon|cachefix} [admin_pin]"; >&2
     exit 1;
 fi
 
@@ -53,8 +53,11 @@ then
 elif [ "$1" = "aut" ]
 then
     DO="D8"
+elif [ "$1" = "att" ]
+then
+    DO="D9"
 else
-    echo "Invalid value $1 (must be sig, aut, dec). Aborting..." >&2
+    echo "Invalid value $1 (must be sig, aut, dec, att). Aborting..." >&2
     exit 1
 fi
 
