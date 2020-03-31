@@ -32,7 +32,7 @@ then
     exit 1;
 fi
 
-if [ -z "$XXD" -a -z "$OD" ]
+if [ -z "$XXD" ] && [ -z "$OD" ]
 then
     echo "Can not find xxd(1) nor od(1). Aborting..." >&2
     exit 1;
@@ -67,13 +67,13 @@ then
     $GCA --hex "scd reset" /bye > /dev/null
 
     GET=$($GCA --hex "scd apdu 00 ca 00 $DO 00" /bye)
-    if ! echo $GET | grep -q "90 00"
+    if ! echo "$GET" | grep -q "90 00"
     then
         echo "Get data failed, unsupported device?" >&2
         exit 1
     fi
 
-    STATUS=$(echo $GET | grep -oE "[0-9]{2} 20 90 00" | cut -c 1-2)
+    STATUS=$(echo "$GET" | grep -oE "[0-9]{2} 20 90 00" | cut -c 1-2)
 
     if [ "$STATUS" = "00" ]
     then
@@ -126,9 +126,10 @@ then
     echo "Falling back to regular stdin." >&2
     echo "Be careful!" >&2
     echo "Enter your admin PIN: "
-    read PIN
+    read -r PIN
 else
-    PIN="$(printf "$PE_PROMPT" | $PE | sed -n '/^D .*/s/^D //p')"
+    # shellcheck disable=SC2059
+    PIN=$(printf "$PE_PROMPT" | $PE | sed -n '/^D .*/s/^D //p')
 fi
 
 if [ -z "$PIN" ]
@@ -139,21 +140,22 @@ fi
 
 PIN_LEN=${#PIN}
 
+# shellcheck disable=SC2059
 PIN=$(printf "$PIN" | ascii_to_hex | tr -d '\n')
 
-PIN_LEN=$(printf %02x $PIN_LEN)
+PIN_LEN=$(printf %02x "$PIN_LEN")
 
 $GCA --hex "scd reset" /bye > /dev/null
 
 VERIFY=$($GCA --hex "scd apdu 00 20 00 83 $PIN_LEN $PIN" /bye)
-if ! echo $VERIFY | grep -q "90 00"
+if ! echo "$VERIFY" | grep -q "90 00"
 then
     echo "Verification failed, wrong pin?" >&2
     exit 1
 fi
 
 PUT=$($GCA --hex "scd apdu 00 da 00 $DO 02 $UIF 20" /bye)
-if ! echo $PUT | grep -q "90 00"
+if ! echo "$PUT" | grep -q "90 00"
 then
     echo "Unable to change mode. Set to fix?" >&2
     exit 1
