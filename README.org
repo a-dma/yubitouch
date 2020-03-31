@@ -21,14 +21,14 @@ its smaller surface / fewer dependencies.
 
 Run the tool as:
 #+BEGIN_SRC sh
-./yubitouch.sh {sig|aut|dec} {off|on|fix|cacheon|cachefix} [admin_pin]
+./yubitouch.sh {sig|aut|dec} {get|off|on|fix|cacheon|cachefix} [admin_pin]
 #+END_SRC
 
 where the parameters indicate the following:
 
 #+BEGIN_EXAMPLE
  {sig|aut|dec|att} Signature, authentication, decryption or attestation key
- {off|on|fix|cacheon|cachefix} Touch setting to use
+ {get|off|on|fix|cacheon|cachefix} Touch setting to use
  [admin_pin] The Admin PIN of the YubiKey (optional)
 #+END_EXAMPLE
 
@@ -46,8 +46,9 @@ information available [[https://developers.yubico.com/PGP/Attestation.html][here
 
 ** Touch settings
 
-The five possible touch settings are explained below.
+The six possible touch settings are explained below.
 
+- get :: Read out the current touch setting of the private key
 - off :: Touch is not required to use the private key
 - on :: Touch is required to use the private key
 - fix :: Same as _on_, plus it can only be reset by
