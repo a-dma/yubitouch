@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# Shell script for setting or clearing touch requirements for
-# cryptographic operations the OpenPGP application on a YubiKey 4.
+# Shell script for reading, setting or clearing touch requirements for
+# cryptographic operations using the OpenPGP application on a
+# YubiKey 4 or YubiKey 5.
 #
 # Author: Alessio Di Mauro <alessio@yubico.com>
 
@@ -40,7 +41,7 @@ fi
 if [ $# -lt 2 ] || [ $# -gt 3 ]
 then
     echo "Wrong parameters" >&2
-    echo "usage: yubitouch {sig|aut|dec|att} {off|on|fix|cacheon|cachefix} [admin_pin]"; >&2
+    echo "usage: yubitouch {sig|aut|dec|att} {get|off|on|fix|cacheon|cachefix} [admin_pin]" >&2
     exit 1;
 fi
 
@@ -61,7 +62,42 @@ else
     exit 1
 fi
 
-if [ "$2" = "off" ]
+if [ "$2" = "get" ]
+then
+    $GCA --hex "scd reset" /bye > /dev/null
+
+    GET=$($GCA --hex "scd apdu 00 ca 00 $DO 00" /bye)
+    if ! echo $GET | grep -q "90 00"
+    then
+        echo "Get data failed, unsupported device?" >&2
+        exit 1
+    fi
+
+    STATUS=$(echo $GET | grep -oE "[0-9]{2} 20 90 00" | cut -c 1-2)
+
+    if [ "$STATUS" = "00" ]
+    then
+        UIF="off"
+    elif [ "$STATUS" = "01" ]
+    then
+        UIF="on"
+    elif [ "$STATUS" = "02" ]
+    then
+        UIF="fix"
+    elif [ "$STATUS" = "03" ]
+    then
+        UIF="cacheon"
+    elif [ "$STATUS" = "04" ]
+    then
+        UIF="cachefix"
+    else
+        echo "Unknown touch setting status ($STATUS)" >&2
+        exit 1
+    fi
+
+    echo "Current $1 touch setting: $UIF" >&2
+    exit 0
+elif [ "$2" = "off" ]
 then
     UIF="00";
 elif [ "$2" = "on" ]
@@ -77,7 +113,7 @@ elif [ "$2" = "cachefix" ]
 then
     UIF="04";
 else
-    echo "Invalid value $2 (must be off, on, fix, cacheon, cachefix). Aborting..." >&2
+    echo "Invalid value $2 (must be get, off, on, fix, cacheon, cachefix). Aborting..." >&2
     exit 1
 fi
 
