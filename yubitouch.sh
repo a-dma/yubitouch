@@ -128,8 +128,9 @@ then
     echo "Enter your admin PIN: "
     read -r PIN
 else
+    CURRENT_TTY=$(tty)
     # shellcheck disable=SC2059
-    PIN=$(printf "$PE_PROMPT" | $PE | sed -n '/^D .*/s/^D //p')
+    PIN=$(printf "$PE_PROMPT" | $PE --ttyname "$CURRENT_TTY" | sed -n '/^D .*/s/^D //p')
 fi
 
 if [ -z "$PIN" ]
