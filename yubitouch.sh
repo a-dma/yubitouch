@@ -64,9 +64,9 @@ fi
 
 if [ "$2" = "get" ]
 then
-    $GCA --hex "scd reset" /bye > /dev/null
+    "$GCA" --hex "scd reset" /bye > /dev/null
 
-    GET=$($GCA --hex "scd apdu 00 ca 00 $DO 00" /bye)
+    GET=$("$GCA" --hex "scd apdu 00 ca 00 $DO 00" /bye)
     if ! echo "$GET" | grep -q "90 00"
     then
         echo "Get data failed, unsupported device?" >&2
@@ -146,16 +146,16 @@ PIN=$(printf "$PIN" | ascii_to_hex | tr -d '\n')
 
 PIN_LEN=$(printf %02x "$PIN_LEN")
 
-$GCA --hex "scd reset" /bye > /dev/null
+"$GCA" --hex "scd reset" /bye > /dev/null
 
-VERIFY=$($GCA --hex "scd apdu 00 20 00 83 $PIN_LEN $PIN" /bye)
+VERIFY=$("$GCA" --hex "scd apdu 00 20 00 83 $PIN_LEN $PIN" /bye)
 if ! echo "$VERIFY" | grep -q "90 00"
 then
     echo "Verification failed, wrong pin?" >&2
     exit 1
 fi
 
-PUT=$($GCA --hex "scd apdu 00 da 00 $DO 02 $UIF 20" /bye)
+PUT=$("$GCA" --hex "scd apdu 00 da 00 $DO 02 $UIF 20" /bye)
 if ! echo "$PUT" | grep -q "90 00"
 then
     echo "Unable to change mode. Set to fix?" >&2
