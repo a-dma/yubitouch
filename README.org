@@ -21,13 +21,13 @@ its smaller surface / fewer dependencies.
 
 Run the tool as:
 #+BEGIN_SRC sh
-./yubitouch.sh {sig|aut|dec} {get|off|on|fix|cacheon|cachefix} [admin_pin]
+./yubitouch.sh {all|sig|aut|dec} {get|off|on|fix|cacheon|cachefix} [admin_pin]
 #+END_SRC
 
 where the parameters indicate the following:
 
 #+BEGIN_EXAMPLE
- {sig|aut|dec|att} Signature, authentication, decryption or attestation key
+ {all|sig|aut|dec|att} All keys, signature, authentication, decryption or attestation key
  {get|off|on|fix|cacheon|cachefix} Touch setting to use
  [admin_pin] The Admin PIN of the YubiKey (optional)
 #+END_EXAMPLE
@@ -36,6 +36,7 @@ where the parameters indicate the following:
 
 The four possible values for the key parameter are explained below.
 
+- all :: Loop over all keys
 - sig :: Key used for digital signatures
 - aut :: Key used for authentication (e.g. SSH)
 - dec :: Key used for decryption
@@ -81,7 +82,8 @@ mindful of having sensitive data stored in your shell history*.
 
 If the Admin PIN is not provided through the command line, the tool
 will ask the user for it. If a version of ~pinentry~ is available it
-will be used, otherwise it will fall back to reading standard input.
+will be used, otherwise it will fall back to reading standard input. If all is
+used for the key parameter then the tool will ask the user only once for it.
 
 ** Personalization advice
 

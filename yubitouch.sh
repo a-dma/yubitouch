@@ -41,126 +41,139 @@ fi
 if [ $# -lt 2 ] || [ $# -gt 3 ]
 then
     echo "Wrong parameters" >&2
-    echo "usage: yubitouch {sig|aut|dec|att} {get|off|on|fix|cacheon|cachefix} [admin_pin]" >&2
+    echo "usage: yubitouch {all|sig|aut|dec|att} {get|off|on|fix|cacheon|cachefix} [admin_pin]" >&2
     exit 1;
 fi
 
-if [ "$1" = "sig" ]
+
+if [ "$1" = "all" ]
 then
-    DO="D6"
-elif [ "$1" = "dec" ]
-then
-    DO="D7"
-elif [ "$1" = "aut" ]
-then
-    DO="D8"
-elif [ "$1" = "att" ]
-then
-    DO="D9"
+    Keys="sig dec aut att"
 else
-    echo "Invalid value $1 (must be sig, aut, dec, att). Aborting..." >&2
-    exit 1
+    Keys=$1
 fi
 
-if [ "$2" = "get" ]
-then
+for k in $Keys; do
+    if [ "$k" = "sig" ]
+    then
+        DO="D6"
+    elif [ "$k" = "dec" ]
+    then
+        DO="D7"
+    elif [ "$k" = "aut" ]
+    then
+        DO="D8"
+    elif [ "$k" = "att" ]
+    then
+        DO="D9"
+    else
+        echo "Invalid key value '$k' (must be sig, aut, dec, att). Aborting..." >&2
+        exit 1
+    fi
+
+    if [ "$2" = "get" ]
+    then
+        "$GCA" --hex "scd reset" /bye > /dev/null
+
+        GET=$("$GCA" --hex "scd apdu 00 ca 00 $DO 00" /bye)
+        if ! echo "$GET" | grep -q "90 00"
+        then
+            echo "Get data failed for $k, unsupported device?" >&2
+            exit 1
+        fi
+
+        STATUS=$(echo "$GET" | grep -oE "[0-9]{2} 20 90 00" | cut -c 1-2)
+
+        if [ "$STATUS" = "00" ]
+        then
+            UIF="off"
+        elif [ "$STATUS" = "01" ]
+        then
+            UIF="on"
+        elif [ "$STATUS" = "02" ]
+        then
+            UIF="fix"
+        elif [ "$STATUS" = "03" ]
+        then
+            UIF="cacheon"
+        elif [ "$STATUS" = "04" ]
+        then
+            UIF="cachefix"
+        else
+            echo "Unknown touch setting status ($STATUS)" >&2
+            exit 1
+        fi
+
+        echo "Current $k touch setting: $UIF" >&2
+        continue
+    elif [ "$2" = "off" ]
+    then
+        UIF="00";
+    elif [ "$2" = "on" ]
+    then
+        UIF="01"
+    elif [ "$2" = "fix" ]
+    then
+        UIF="02";
+    elif [ "$2" = "cacheon" ]
+    then
+        UIF="03";
+    elif [ "$2" = "cachefix" ]
+    then
+        UIF="04";
+    else
+        echo "Invalid value $2 (must be get, off, on, fix, cacheon, cachefix). Aborting..." >&2
+        exit 1
+    fi
+
+    echo "Processing key $k with action $2"
+
+    if [ $# -eq 3 ] && [ -z "$PIN" ]
+    then
+        PIN="$3"
+    elif [ -z "$PE" ] && [ -z "$PIN" ]
+    then
+        echo "Pinentry not present" >&2
+        echo "Falling back to regular stdin." >&2
+        echo "Be careful!" >&2
+        echo "Enter your admin PIN: "
+        read -r PIN
+    elif [ -z "$PIN" ]
+    then
+        CURRENT_TTY=$(tty)
+        # shellcheck disable=SC2059
+        PIN=$(printf "$PE_PROMPT" | $PE --ttyname "$CURRENT_TTY" | sed -n '/^D .*/s/^D //p')
+    fi
+
+    if [ -z "$PIN" ]
+    then
+        echo "Empty PIN. Aborting..." >&2
+        exit 1
+    fi
+
+    PIN_LEN=${#PIN}
+
+    # shellcheck disable=SC2059
+    PIN_HEX=$(printf "$PIN" | ascii_to_hex | tr -d '\n')
+
+    PIN_LEN_HEX=$(printf %02x "$PIN_LEN")
+
     "$GCA" --hex "scd reset" /bye > /dev/null
 
-    GET=$("$GCA" --hex "scd apdu 00 ca 00 $DO 00" /bye)
-    if ! echo "$GET" | grep -q "90 00"
+    VERIFY=$("$GCA" --hex "scd apdu 00 20 00 83 $PIN_LEN_HEX $PIN_HEX" /bye)
+    if ! echo "$VERIFY" | grep -q "90 00"
     then
-        echo "Get data failed, unsupported device?" >&2
+        echo "Verification failed, wrong pin?" >&2
         exit 1
     fi
 
-    STATUS=$(echo "$GET" | grep -oE "[0-9]{2} 20 90 00" | cut -c 1-2)
-
-    if [ "$STATUS" = "00" ]
+    PUT=$("$GCA" --hex "scd apdu 00 da 00 $DO 02 $UIF 20" /bye)
+    if ! echo "$PUT" | grep -q "90 00"
     then
-        UIF="off"
-    elif [ "$STATUS" = "01" ]
-    then
-        UIF="on"
-    elif [ "$STATUS" = "02" ]
-    then
-        UIF="fix"
-    elif [ "$STATUS" = "03" ]
-    then
-        UIF="cacheon"
-    elif [ "$STATUS" = "04" ]
-    then
-        UIF="cachefix"
-    else
-        echo "Unknown touch setting status ($STATUS)" >&2
+        echo "Unable to change mode for key $k. Set to fix?" >&2
         exit 1
     fi
-
-    echo "Current $1 touch setting: $UIF" >&2
-    exit 0
-elif [ "$2" = "off" ]
-then
-    UIF="00";
-elif [ "$2" = "on" ]
-then
-    UIF="01"
-elif [ "$2" = "fix" ]
-then
-    UIF="02";
-elif [ "$2" = "cacheon" ]
-then
-    UIF="03";
-elif [ "$2" = "cachefix" ]
-then
-    UIF="04";
-else
-    echo "Invalid value $2 (must be get, off, on, fix, cacheon, cachefix). Aborting..." >&2
-    exit 1
-fi
-
-if [ $# -eq 3 ]
-then
-    PIN="$3"
-elif [ -z "$PE" ]
-then
-    echo "Pinentry not present" >&2
-    echo "Falling back to regular stdin." >&2
-    echo "Be careful!" >&2
-    echo "Enter your admin PIN: "
-    read -r PIN
-else
-    CURRENT_TTY=$(tty)
-    # shellcheck disable=SC2059
-    PIN=$(printf "$PE_PROMPT" | $PE --ttyname "$CURRENT_TTY" | sed -n '/^D .*/s/^D //p')
-fi
-
-if [ -z "$PIN" ]
-then
-    echo "Empty PIN. Aborting..." >&2
-    exit 1
-fi
-
-PIN_LEN=${#PIN}
-
-# shellcheck disable=SC2059
-PIN=$(printf "$PIN" | ascii_to_hex | tr -d '\n')
-
-PIN_LEN=$(printf %02x "$PIN_LEN")
-
-"$GCA" --hex "scd reset" /bye > /dev/null
-
-VERIFY=$("$GCA" --hex "scd apdu 00 20 00 83 $PIN_LEN $PIN" /bye)
-if ! echo "$VERIFY" | grep -q "90 00"
-then
-    echo "Verification failed, wrong pin?" >&2
-    exit 1
-fi
-
-PUT=$("$GCA" --hex "scd apdu 00 da 00 $DO 02 $UIF 20" /bye)
-if ! echo "$PUT" | grep -q "90 00"
-then
-    echo "Unable to change mode. Set to fix?" >&2
-    exit 1
-fi
+done
 
 echo "All done!"
 exit 0
