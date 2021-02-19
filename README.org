@@ -34,7 +34,7 @@ where the parameters indicate the following:
 
 ** Key choice
 
-The four possible values for the key parameter are explained below.
+The five possible values for the key parameter are explained below.
 
 - all :: Loop over all keys
 - sig :: Key used for digital signatures
